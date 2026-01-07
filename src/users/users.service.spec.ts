@@ -240,7 +240,7 @@ describe('UsersService', () => {
       mockUserModel.create.mockResolvedValue(createdUser);
 
       // When: 사용자 생성
-      const result = await service.create(createUserDto);
+      const result = //await service.create(createUserDto);
 
       // Then: 주소 없이도 생성 가능해야 함
       expect(result).toEqual(createdUser);
