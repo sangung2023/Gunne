@@ -1,0 +1,31 @@
+
+
+services:
+  # 1. 몽고디비 서비스
+  mongo:
+    image: mongo:latest
+    container_name: nest_mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      # DB 데이터를 내 컴퓨터에도 저장 (컨테이너가 꺼져도 데이터 유지)
+      - ./mongo-data:/data/db
+
+  # 2. NestJS 앱 서비스
+  app:
+    build: .
+    container_name: nest_app
+    ports:
+      - "3000:3000"
+    volumes:
+      # 내 컴퓨터의 코드 수정사항이 컨테이너에 바로 반영되도록 연결
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongo
+    environment:
+      # 중요: 도커 내부에서는 'localhost' 대신 서비스 이름('mongo')을 씁니다.
+      MONGO_URI: mongodb://root:rootpassword@mongo:27017/nestdb?authSource=admin
