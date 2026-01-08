@@ -42,5 +42,5 @@ jobs:
     - name: Run Tests
       run: npm run test
       env:
-        # 깃허브에선 localhost:27017로 접속하면 위에서 만든 DB로 연결됨
+        # 깃허브에선 localhost:27017로 접속하면 위에서 만든 DB로 연
         MONGO_URI: mongodb://localhost:27017/test
