@@ -18,29 +18,29 @@ import { UserResponseDto } from './dto/user-response.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * UserDocument에서 비밀번호를 제외한 UserResponseDto로 변환
+   * Mongoose 문서인 경우 toObject() 사용, 일반 객체인 경우 그대로 사용
+   */
+  private excludePassword(user: any): UserResponseDto {
+    const userObject =
+      typeof user.toObject === 'function' ? user.toObject() : user;
+    const { password, ...userResponse } = userObject;
+    return userResponse as unknown as UserResponseDto;
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED) // 201 Created 상태 코드 명시
   async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const createdUser = await this.usersService.create(createUserDto);
-    // 비밀번호를 제외한 응답 반환
-    // Mongoose 문서인 경우 toObject() 사용, 일반 객체인 경우 그대로 사용
-    const userObject =
-      typeof createdUser.toObject === 'function'
-        ? createdUser.toObject()
-        : createdUser;
-    const { password, ...userResponse } = userObject;
-    // password를 제외한 나머지 필드만 반환
-    return userResponse as unknown as UserResponseDto;
-  }
-
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+    return this.excludePassword(createdUser);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
+    const foundUser = await this.usersService.findOne(id);
+    return this.excludePassword(foundUser);
   }
 
   @Patch(':id')

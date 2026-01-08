@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -45,12 +45,14 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  async findOne(id: string): Promise<UserDocument> {
+    const user = await this.userModel.findById(id).exec();
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
+    }
+
+    return user;
   }
 
   // TODO: 구현 예정

@@ -22,4 +22,5 @@ export const MONGO_DUPLICATE_KEY_ERROR_CODE = 11000;
 // 에러 메시지
 export const ERROR_MESSAGES = {
   EMAIL_ALREADY_EXISTS: '이미 존재하는 이메일입니다.',
+  USER_NOT_FOUND: '사용자를 찾을 수 없습니다.',
 } as const;

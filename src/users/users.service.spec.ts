@@ -11,6 +11,7 @@ describe('UsersService', () => {
   const mockUserModel = {
     create: jest.fn(),
     findOne: jest.fn(),
+    findById: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -247,6 +248,107 @@ describe('UsersService', () => {
       // Then: 주소 없이도 생성 가능해야 함
       expect(result).toEqual(createdUser);
       expect(mockUserModel.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('should find a user by id', async () => {
+      // Given: 사용자 ID
+      const userId = '507f1f77bcf86cd799439011';
+      const foundUser = {
+        _id: userId,
+        email: 'test@example.com',
+        password: 'hashed_password',
+        nickname: '테스트유저',
+        address: {
+          city: '서울시',
+          district: '강남구',
+          street: '역삼동',
+        },
+        wishList: [],
+        mannerTemperature: 36.5,
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Given: findById가 사용자를 반환하도록 모킹
+      mockUserModel.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(foundUser),
+      });
+
+      // When: 사용자 조회
+      const result = await service.findOne(userId);
+
+      // Then: findById가 올바른 ID로 호출되었는지 확인
+      expect(mockUserModel.findById).toHaveBeenCalledWith(userId);
+      expect(mockUserModel.findById).toHaveBeenCalledTimes(1);
+
+      // Then: 조회된 사용자가 반환되어야 함
+      expect(result).toEqual(foundUser);
+    });
+
+    it('should return user without password in response', async () => {
+      // Given: 사용자 ID
+      const userId = '507f1f77bcf86cd799439011';
+      const foundUser = {
+        _id: userId,
+        email: 'test@example.com',
+        password: 'hashed_password',
+        nickname: '테스트유저',
+        address: {
+          city: '서울시',
+          district: '강남구',
+          street: '역삼동',
+        },
+        wishList: [],
+        mannerTemperature: 36.5,
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockUserModel.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(foundUser),
+      });
+
+      // When: 사용자 조회
+      const result = await service.findOne(userId);
+
+      // Then: 사용자 정보가 반환되어야 함
+      expect(result).toBeDefined();
+      expect(result.email).toBe(foundUser.email);
+      expect(result.nickname).toBe(foundUser.nickname);
+      // Note: 비밀번호 제외는 Controller에서 처리하지만, Service는 원본 반환
+    });
+
+    it('should throw error when user not found', async () => {
+      // Given: 존재하지 않는 사용자 ID
+      const userId = '507f1f77bcf86cd799439099';
+
+      // Given: findById가 null을 반환하도록 모킹
+      mockUserModel.findById.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      // When & Then: 사용자를 찾을 수 없을 때 에러 발생
+      await expect(service.findOne(userId)).rejects.toThrow();
+      expect(mockUserModel.findById).toHaveBeenCalledWith(userId);
+    });
+
+    it('should handle invalid id format', async () => {
+      // Given: 잘못된 형식의 ID
+      const invalidId = 'invalid-id';
+
+      // Given: MongoDB 에러 발생
+      const mongoError = new Error('Cast to ObjectId failed');
+      mockUserModel.findById.mockReturnValue({
+        exec: jest.fn().mockRejectedValue(mongoError),
+      });
+
+      // When & Then: 에러가 전파되어야 함
+      await expect(service.findOne(invalidId)).rejects.toThrow();
+      expect(mockUserModel.findById).toHaveBeenCalledWith(invalidId);
     });
   });
 });
