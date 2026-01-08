@@ -1,5 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import {
+  DEFAULT_MANNER_TEMPERATURE,
+  DEFAULT_USER_ROLE,
+} from '../constants/user.constants';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -7,13 +11,13 @@ export type UserDocument = HydratedDocument<User>;
 @Schema({ _id: false }) // 주소 객체에는 별도의 _id가 필요 없어서 끕니다.
 export class Address {
   @Prop()
-  city: string;     // 예: 서울시
+  city: string; // 예: 서울시
 
   @Prop()
   district: string; // 예: 강남구
 
   @Prop()
-  street: string;   // 예: 역삼동
+  street: string; // 예: 역삼동
 }
 
 // 2. 메인 유저 스키마
@@ -29,7 +33,7 @@ export class User {
   nickname: string;
 
   // [핵심 1] 몽고디비 스타일: 주소 테이블을 따로 안 만들고 유저 안에 심어버립니다.
-  @Prop({ type: Address }) 
+  @Prop({ type: Address })
   address: Address;
 
   // [핵심 2] 찜한 목록 (Product ID들의 배열)
@@ -37,10 +41,10 @@ export class User {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
   wishList: Types.ObjectId[];
 
-  @Prop({ default: 36.5 }) // 매너온도 기본값
+  @Prop({ default: DEFAULT_MANNER_TEMPERATURE }) // 매너온도 기본값
   mannerTemperature: number;
 
-  @Prop({ default: 'user' }) // 관리자('admin') 구분용
+  @Prop({ default: DEFAULT_USER_ROLE }) // 관리자('admin') 구분용
   role: string;
 }
 
