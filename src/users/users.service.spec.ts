@@ -112,7 +112,7 @@ describe('UsersService', () => {
       mockUserModel.create.mockResolvedValue(createdUser);
 
       // When: 사용자 생성
-      const result = await service.create(createUserDto) as any;
+      const result = (await service.create(createUserDto)) as any;
 
       // Then: 기본값이 설정되어야 함
       expect(result.mannerTemperature).toBe(36.5);
@@ -212,7 +212,9 @@ describe('UsersService', () => {
       mockUserModel.create.mockRejectedValue(dbError);
 
       // When & Then: DB 에러가 전파되어야 함
-      await expect(service.create(createUserDto)).rejects.toThrow('Database connection failed');
+      await expect(service.create(createUserDto)).rejects.toThrow(
+        'Database connection failed',
+      );
       expect(mockUserModel.create).toHaveBeenCalled();
     });
 
