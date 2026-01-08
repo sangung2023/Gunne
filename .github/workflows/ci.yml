@@ -1,0 +1,31 @@
+name: CI (Test Runner)
+
+# 언제 실행할지 설정 (main 브랜치나 feature로 시작하는 브랜치에 푸시하면 실행)
+on:
+  push:
+    branches: [ "main", "feature/**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # 깃허브의 가상 컴퓨터(Ubuntu) 사용
+
+    strategy:
+      matrix:
+        node-version: [20.x] # 노드 버전 (님 컴퓨터랑 맞춤)
+
+    steps:
+    - uses: actions/checkout@v3 # 1. 코드 내려받기
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3 # 2. 노드 설치
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci # 3. 패키지 설치 (npm install보다 깔끔함)
+
+    - name: Run Tests
+      run: npm run test # 4. 테스트 실행 (여기서 에러나면 빨간불 뜸!)
